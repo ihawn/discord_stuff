@@ -1,0 +1,29 @@
+# Production on server01 pulls the images; for local work run `docker compose up --build`.
+name: discord-recorder
+
+services:
+  transcriber:
+    image: ghcr.io/ihawn/discord_stuff/transcriber:latest
+    build: ./transcriber
+    restart: unless-stopped
+    env_file: [.env]
+    volumes:
+      - ./models:/models
+    # server01 is shared with other projects: cap what this stack can take. At the cap the
+    # kernel kills this container, not its neighbours.
+    mem_limit: 3g
+    memswap_limit: 3g
+    cpus: 4
+
+  bot:
+    image: ghcr.io/ihawn/discord_stuff/bot:latest
+    build: ./bot
+    restart: unless-stopped
+    env_file: [.env]
+    volumes:
+      - ./data:/data
+    depends_on:
+      - transcriber
+    mem_limit: 768m
+    memswap_limit: 768m
+    cpus: 2
