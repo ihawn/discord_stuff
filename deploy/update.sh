@@ -8,7 +8,7 @@ exec 9>.update.lock
 flock -n 9 || exit 0
 
 git pull --ff-only -q
-docker compose pull -q
+docker compose pull -q >/dev/null 2>&1
 
 # Not configured yet: do not start a bot that would crash-loop without its token.
 grep -q '^DISCORD_TOKEN=.\+' .env 2>/dev/null || exit 0
