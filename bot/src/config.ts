@@ -40,6 +40,6 @@ export function loadConfig(): Config {
     maxSessionMs: num('MAX_SESSION_HOURS', 6) * 3600 * 1000,
     maxUploadBytes: Math.floor(num('MAX_UPLOAD_MB', 10) * 1024 * 1024 * 0.9),
     retentionDays: num('RETENTION_DAYS', 14),
-    timezone: process.env.TIMEZONE ?? 'America/Chicago',
+    timezone: process.env.TIMEZONE || 'UTC',
   };
 }

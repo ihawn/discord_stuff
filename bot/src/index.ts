@@ -7,6 +7,7 @@ import { RecordingSession } from './session.js';
 import { transcriberClient } from './transcriber-client.js';
 
 const cfg = loadConfig();
+process.umask(0o077); // recordings are private: owner-only files, also for ffmpeg children
 const sessionsDir = path.join(cfg.dataDir, 'sessions');
 const activeMarker = path.join(cfg.dataDir, 'ACTIVE');
 mkdirSync(sessionsDir, { recursive: true });
@@ -32,7 +33,7 @@ async function deps(): Promise<PipelineDeps> {
     async post({ content, files }) {
       const channel = await client.channels.fetch(cfg.transcriptChannelId);
       if (!channel?.isTextBased() || !('send' in channel)) throw new Error('transcript channel is not a text channel');
-      await channel.send({ content, files: files.map((f) => ({ attachment: f.path, name: f.name })) });
+      await channel.send({ content, files: files.map((f) => ({ attachment: f.path, name: f.name })), allowedMentions: { parse: [] } });
     },
   };
 }

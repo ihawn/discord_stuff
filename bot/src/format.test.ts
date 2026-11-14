@@ -15,10 +15,10 @@ test('fmtDuration', () => {
 
 test('mergeSegments orders by time and drops blanks', () => {
   const out = mergeSegments({
-    isaac: [{ start: 5, end: 6, text: ' second ' }, { start: 9, end: 10, text: '   ' }],
-    silas: [{ start: 1, end: 2, text: 'first' }],
+    alice: [{ start: 5, end: 6, text: ' second ' }, { start: 9, end: 10, text: '   ' }],
+    bob: [{ start: 1, end: 2, text: 'first' }],
   });
-  assert.deepEqual(out, ['[00:01] silas: first', '[00:05] isaac: second']);
+  assert.deepEqual(out, ['[00:01] bob: first', '[00:05] alice: second']);
 });
 
 test('chooseBitrateKbps fits the budget or gives up', () => {

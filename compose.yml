@@ -1,22 +1,22 @@
-# Production on server01 pulls the images; for local work run `docker compose up --build`.
-name: discord-recorder
+# The server pulls the CI images (IMAGE_PREFIX in .env); for local work run `docker compose up --build`.
+name: rico
 
 services:
   transcriber:
-    image: ghcr.io/ihawn/discord_stuff/transcriber:latest
+    image: ${IMAGE_PREFIX:-localhost/rico}/transcriber:latest
     build: ./transcriber
     restart: unless-stopped
     env_file: [.env]
     volumes:
       - ./models:/models
-    # server01 is shared with other projects: cap what this stack can take. At the cap the
+    # The server is shared with other projects: cap what this stack can take. At the cap the
     # kernel kills this container, not its neighbours.
     mem_limit: 3g
     memswap_limit: 3g
     cpus: 4
 
   bot:
-    image: ghcr.io/ihawn/discord_stuff/bot:latest
+    image: ${IMAGE_PREFIX:-localhost/rico}/bot:latest
     build: ./bot
     restart: unless-stopped
     env_file: [.env]

@@ -23,28 +23,28 @@ const fakeDeps = (posted: unknown[], over: Partial<PipelineDeps> = {}): Pipeline
   transcribe: async () => [{ start: 1.5, end: 2, text: ' hello there ' }],
   post: async (m) => { posted.push(m); },
   maxUploadBytes: 9_000_000,
-  timezone: 'America/Chicago',
+  timezone: 'UTC',
   minSessionMs: 20_000,
   ...over,
 });
 
 test('posts transcript and audio, keeps flac, drops pcm', { skip: !hasFfmpeg }, async () => {
-  const dir = sessionDir(60, { u1: 'isaac', u2: 'silas' });
+  const dir = sessionDir(60, { u1: 'alice', u2: 'bob' });
   const posted: any[] = [];
   assert.equal(await processSession(dir, fakeDeps(posted)), 'posted');
   assert.equal(posted.length, 1);
   assert.deepEqual(posted[0].files.map((f: any) => f.name), ['transcript.txt', 'audio.ogg']);
   assert.match(posted[0].content, /Lounge/);
-  assert.match(posted[0].content, /isaac, silas/);
+  assert.match(posted[0].content, /alice, bob/);
   const transcript = readFileSync(path.join(dir, 'transcript.txt'), 'utf8');
-  assert.match(transcript, /\[00:01\] isaac: hello there/);
+  assert.match(transcript, /\[00:01\] alice: hello there/);
   assert.deepEqual(readdirSync(dir).filter((f) => f.endsWith('.pcm')), []);
   assert.ok(existsSync(path.join(dir, 'u1.flac')));
   assert.ok(isFinished(dir));
 });
 
 test('skips short sessions without posting', { skip: !hasFfmpeg }, async () => {
-  const dir = sessionDir(5, { u1: 'isaac' });
+  const dir = sessionDir(5, { u1: 'alice' });
   const posted: any[] = [];
   assert.equal(await processSession(dir, fakeDeps(posted)), 'skipped');
   assert.equal(posted.length, 0);
@@ -52,21 +52,21 @@ test('skips short sessions without posting', { skip: !hasFfmpeg }, async () => {
 });
 
 test('skips sessions with no speech', { skip: !hasFfmpeg }, async () => {
-  const dir = sessionDir(60, { u1: 'isaac' });
+  const dir = sessionDir(60, { u1: 'alice' });
   const posted: any[] = [];
   assert.equal(await processSession(dir, fakeDeps(posted, { transcribe: async () => [] })), 'skipped');
   assert.equal(posted.length, 0);
 });
 
 test('a failed post leaves the session unfinished so it can be retried', { skip: !hasFfmpeg }, async () => {
-  const dir = sessionDir(60, { u1: 'isaac' });
+  const dir = sessionDir(60, { u1: 'alice' });
   await assert.rejects(processSession(dir, fakeDeps([], { post: async () => { throw new Error('discord down'); } })), /discord down/);
   assert.equal(isFinished(dir), false);
   assert.ok(existsSync(path.join(dir, 'u1.pcm')));
 });
 
 test('long sessions skip the audio attachment but still post the transcript', { skip: !hasFfmpeg }, async () => {
-  const dir = sessionDir(3 * 3600, { u1: 'isaac' });
+  const dir = sessionDir(3 * 3600, { u1: 'alice' });
   const posted: any[] = [];
   await processSession(dir, fakeDeps(posted));
   assert.deepEqual(posted[0].files.map((f: any) => f.name), ['transcript.txt']);

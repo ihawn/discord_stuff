@@ -1,5 +1,5 @@
 {
-  "name": "discord-recorder-bot",
+  "name": "rico-bot",
   "private": true,
   "type": "module",
   "engines": { "node": ">=22" },
